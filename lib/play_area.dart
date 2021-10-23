@@ -16,7 +16,10 @@ class PlayArea extends StatelessWidget {
         child: Column(
           children: [
             TopBar(),
-            Expanded(child: PuzzleFrame()),
+            Expanded(
+                child: PuzzleFrame(
+              assetOrFile: tempPuzzleImage,
+            )),
             Gallery()
           ],
         ),
@@ -31,8 +34,7 @@ class TopBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(
-          defHorPadding, 15, defHorPadding, 0),
+      padding: const EdgeInsets.fromLTRB(defHorPadding, 15, defHorPadding, 0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -47,4 +49,3 @@ class TopBar extends StatelessWidget {
     );
   }
 }
-
