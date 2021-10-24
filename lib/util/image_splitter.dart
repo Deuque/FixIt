@@ -9,21 +9,21 @@ class ImageSplitter {
 
   ImageSplitter(this.initialImage);
 
-  Completer<List<Image>> _splitImagesCompleter = Completer();
+  Completer<void> _splitImagesCompleter = Completer();
   late Isolate _isolate;
 
-  StreamController<int> _resolvedImages = StreamController();
-  Stream<int> get resolvedImagesStream =>_resolvedImages.stream;
-  Future<List<Image>> get splitImagesReady => _splitImagesCompleter.future;
+  StreamController<Image> _resolvedImages = StreamController();
+  Stream<Image> get resolvedImagesStream =>_resolvedImages.stream;
+  Future<void> get splitImagesReady => _splitImagesCompleter.future;
 
 
   void init() async {
     ReceivePort imagesPort = ReceivePort();
 
     imagesPort.listen((message) {
-      if (message is List<Image>) {
-        _splitImagesCompleter.complete(message);
-      }else if(message is int){
+      if (message is bool) {
+        _splitImagesCompleter.complete();
+      }else if(message is Image){
         _resolvedImages.sink.add(message);
       }
     });
@@ -61,16 +61,15 @@ class ImageSplitter {
     }
 
     //Convert image from image package to Image Widget to display
-    List<Image> outputImageList = [];
     for (imglib.Image img in parts) {
-      outputImageList.add(Image.memory(
+      final newImage = Image.memory(
         Uint8List.fromList(
           imglib.encodeJpg(img),
         ),
-      ));
-      imageSlitProcess.responsePort.send(outputImageList.length);
+      );
+      imageSlitProcess.responsePort.send(newImage);
     }
-    imageSlitProcess.responsePort.send(outputImageList);
+    imageSlitProcess.responsePort.send(true);
   }
 }
 

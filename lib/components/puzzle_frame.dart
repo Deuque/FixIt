@@ -81,10 +81,10 @@ class PuzzleFrame extends StatelessWidget {
                     width: state.boxSize,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.only(
-                        topLeft: state.puzzleImages.indexOf(e) == 0
+                        topLeft: e.currentPosition == 0
                             ? Radius.circular(15)
                             : Radius.zero,
-                        topRight: state.puzzleImages.indexOf(e) == 2
+                        topRight: e.currentPosition == 2
                             ? Radius.circular(15)
                             : Radius.zero,
                       ),
@@ -120,12 +120,12 @@ class PuzzleFrame extends StatelessWidget {
             Loader(
               size: constraint.maxWidth * .05,
             ),
-            if (state.percentage != null) ...[
+            if (state.message != null) ...[
               SizedBox(
                 height: 5,
               ),
               Text(
-                '${state.percentage?.toStringAsFixed(0)}%',
+                '${state.message}',
                 style: TextStyle(color: white),
               )
             ]

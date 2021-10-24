@@ -1,4 +1,3 @@
-
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:fix_it/util/image_splitter.dart';
@@ -27,7 +26,7 @@ class PuzzleCubit extends Cubit<PuzzleState> {
   void shuffle() {
     _puzzleImages = [
       for (final item in _puzzleImages)
-        if (item.index == 4)
+        if (item.realIndex == 4)
           item.copyWith(offset: _puzzlePositions[5])
         else
           item
@@ -68,7 +67,8 @@ class PuzzleCubit extends Cubit<PuzzleState> {
   }
 
   void setPuzzleImages(dynamic assetOrFile, double imageSize) async {
-    emit(PuzzleCreatingImages());
+    emit(PuzzleCreatingImages(message: 'Framing Image'));
+    _puzzleImages.clear();
     late List<int> initialImage;
     if (assetOrFile is String) {
       var data = await rootBundle.load(assetOrFile);
@@ -81,36 +81,45 @@ class PuzzleCubit extends Cubit<PuzzleState> {
     final imageSplitter = ImageSplitter(initialImage);
     imageSplitter.init();
     // listen for percentage done
-    imageSplitter.resolvedImagesStream.listen((processed) {
-      double percentageDone = (processed / 9) * 100;
-      emit(PuzzleCreatingImages(percentage: percentageDone));
+    final imageSubscription =
+        imageSplitter.resolvedImagesStream.listen((processedImage) {
+      int newIndex = _puzzleImages.length;
+      _puzzleImages = [
+        ..._puzzleImages,
+        IndexedImage(
+            realIndex: newIndex,
+            currentPosition: newIndex,
+            image: processedImage,
+            offset: _puzzlePositions[newIndex])
+      ];
+      emit(PuzzleImagesSet(_puzzleImages, imageSize));
     });
 
-    // get split images and dispose isolate
-    List<Image> splitImages = await imageSplitter.splitImagesReady;
+    // check when splitting is done and dispose isolate
+    await imageSplitter.splitImagesReady;
+    imageSubscription.cancel();
     imageSplitter.dispose();
-
-    _puzzleImages = List.generate(
-        splitImages.length,
-        (index) => IndexedImage(
-            index: index,
-            image: splitImages[index],
-            offset: _puzzlePositions[index]));
-    emit(PuzzleImagesSet(_puzzleImages, imageSize));
   }
 }
 
 class IndexedImage extends Equatable {
-  final int index;
+  final int realIndex;
   final Image image;
+  final int currentPosition;
   final Offset offset;
 
   @override
-  List<Object?> get props => [index, image, offset];
+  List<Object?> get props => [realIndex, image, currentPosition, offset];
 
   IndexedImage(
-      {required this.index, required this.image, required this.offset});
+      {required this.realIndex,
+      required this.image,
+      required this.currentPosition,
+      required this.offset});
 
-  IndexedImage copyWith({Offset? offset}) => IndexedImage(
-      image: this.image, index: this.index, offset: offset ?? this.offset);
+  IndexedImage copyWith({Offset? offset, int? currentPosition}) => IndexedImage(
+      image: this.image,
+      realIndex: this.realIndex,
+      offset: offset ?? this.offset,
+      currentPosition: currentPosition ?? this.currentPosition);
 }

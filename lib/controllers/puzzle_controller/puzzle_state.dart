@@ -21,11 +21,11 @@ class PuzzlePositionsSet extends PuzzleState {
   List<Object> get props => [boxSize];
 }
 class PuzzleCreatingImages extends PuzzleState {
-  final double? percentage;
+  final String? message;
 
-  PuzzleCreatingImages({this.percentage});
+  PuzzleCreatingImages({this.message});
   @override
-  List<Object> get props => [(percentage??0)];
+  List<Object> get props => [(message??'')];
 }
 class PuzzleImagesSet extends PuzzleState {
   final List<IndexedImage> puzzleImages;
