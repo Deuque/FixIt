@@ -6,11 +6,25 @@ import 'package:fix_it/util/styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class PuzzleFrame extends StatelessWidget {
+class PuzzleFrame extends StatefulWidget {
   final dynamic assetOrFile;
 
   PuzzleFrame({Key? key, this.assetOrFile}) : super(key: key);
+
+  @override
+  _PuzzleFrameState createState() => _PuzzleFrameState();
+}
+
+class _PuzzleFrameState extends State<PuzzleFrame> {
   final _puzzleCubit = locator<PuzzleCubit>();
+
+  @override
+  void initState() {
+    WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
+      _puzzleCubit.emit(PuzzleInitial());
+    });
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +45,7 @@ class PuzzleFrame extends StatelessWidget {
                   Container(
                     height: constraint.maxWidth,
                     width: constraint.maxWidth,
-                    child: assetOrFile == null
+                    child: widget.assetOrFile == null
                         ? SizedBox.shrink()
                         : Stack(
                             children: [
@@ -42,7 +56,8 @@ class PuzzleFrame extends StatelessWidget {
                                           context, state, constraint),
                                   builder: (context, state) {
                                     if (state is PuzzleCreatingImages)
-                                      return _createPuzzleLoader(state,constraint);
+                                      return _createPuzzleLoader(
+                                          state, constraint);
                                     if (state is PuzzleImagesSet)
                                       return _setImagesInPosition(state);
                                     return SizedBox.shrink();
@@ -65,41 +80,43 @@ class PuzzleFrame extends StatelessWidget {
       _puzzleCubit.setPuzzlePositions(
           puzzleFrameSize: constraint.maxWidth, boxInnerPadding: 1.5);
     } else if (state is PuzzlePositionsSet) {
-      _puzzleCubit.setPuzzleImages(assetOrFile, state.boxSize);
+      _puzzleCubit.setPuzzleImages(widget.assetOrFile);
     }
   }
 
-  Widget _setImagesInPosition(PuzzleImagesSet state) => Stack(
-        children: state.puzzleImages
-            .map((e) => AnimatedPositioned(
-                  top: e.offset.dy,
-                  left: e.offset.dx,
-                  duration: Duration(milliseconds: 400),
-                  curve: Curves.decelerate,
-                  child: Container(
-                    height: state.boxSize,
-                    width: state.boxSize,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.only(
-                        topLeft: e.currentPosition == 0
-                            ? Radius.circular(15)
-                            : Radius.zero,
-                        topRight: e.currentPosition == 2
-                            ? Radius.circular(15)
-                            : Radius.zero,
+  Widget _setImagesInPosition(PuzzleImagesSet state) => ClipRRect(
+    borderRadius: BorderRadius.vertical(top: Radius.circular(defPuzzleRadius)),
+    child: Stack(
+          children: state.puzzleImages
+              .map((e) => AnimatedPositioned(
+                    top: e.offset.dy,
+                    left: e.offset.dx,
+                    duration: Duration(milliseconds: 400),
+                    curve: Curves.decelerate,
+                    child: GestureDetector(
+                      onTap: (){
+                        if(state.playStarted){
+                          locator<PuzzleCubit>().moveImage(e);
+                        }
+                      },
+                      child: Container(
+                        height: state.boxSize,
+                        width: state.boxSize,
+                        decoration: BoxDecoration(
+                          image: DecorationImage(
+                              image: e.image.image, fit: BoxFit.fill),
+                        ),
                       ),
-                      image: DecorationImage(
-                          image: e.image.image, fit: BoxFit.fill),
                     ),
-                  ),
-                ))
-            .toList(),
-      );
+                  ))
+              .toList(),
+        ),
+  );
 
   Widget _backgroundPuzzleHint() => Container(
         decoration: BoxDecoration(
-          image:
-              DecorationImage(image: AssetImage(assetOrFile), fit: BoxFit.fill),
+          image: DecorationImage(
+              image: AssetImage(widget.assetOrFile), fit: BoxFit.fill),
           borderRadius:
               BorderRadius.vertical(top: Radius.circular(defPuzzleRadius)),
         ),
@@ -112,7 +129,8 @@ class PuzzleFrame extends StatelessWidget {
         ),
       );
 
-  Widget _createPuzzleLoader(PuzzleCreatingImages state,BoxConstraints constraint)=>
+  Widget _createPuzzleLoader(
+          PuzzleCreatingImages state, BoxConstraints constraint) =>
       Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -139,28 +157,34 @@ class PuzzleControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-            child: PuzzleButton.left(
-          title: 'START',
-          enabled: true,
-          onPressed: () {
-            locator<PuzzleCubit>().tet();
-          },
-        )),
-        SizedBox(
-          width: 2,
-        ),
-        Expanded(
-            child: PuzzleButton.right(
-          title: 'SHUFFLE',
-          enabled: true,
-          onPressed: () {
-            locator<PuzzleCubit>().shuffle();
-          },
-        )),
-      ],
+    return BlocBuilder<PuzzleCubit, PuzzleState>(
+      builder: (context, state) {
+        return Row(
+          children: [
+            Expanded(
+                child: PuzzleButton.left(
+              title: (state is PuzzleImagesSet && state.playStarted)
+                  ? '0'
+                  : 'START',
+              enabled: state is PuzzleImagesSet && !(state.playStarted),
+              onPressed: () {
+                locator<PuzzleCubit>().startGame();
+              },
+            )),
+            SizedBox(
+              width: 2,
+            ),
+            Expanded(
+                child: PuzzleButton.right(
+              title: 'SHUFFLE',
+              enabled: (state is PuzzleImagesSet && state.playStarted),
+              onPressed: () {
+                locator<PuzzleCubit>().shuffle();
+              },
+            )),
+          ],
+        );
+      },
     );
   }
 }

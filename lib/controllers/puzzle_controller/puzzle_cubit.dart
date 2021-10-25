@@ -1,3 +1,6 @@
+import 'dart:developer';
+import 'dart:math';
+
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:fix_it/util/image_splitter.dart';
@@ -11,34 +14,110 @@ class PuzzleCubit extends Cubit<PuzzleState> {
 
   List<Offset> _puzzlePositions = [];
   List<IndexedImage> _puzzleImages = [];
-  bool initPositions = false;
+  double _puzzleBoxSize = 0;
+  late IndexedImage wildCard;
+  late int _emptyPosition;
 
   void tet() {
     emit(PuzzleInitial());
   }
 
-  void resetPuzzle() {
-    _puzzleImages = [];
-    _puzzlePositions = [];
-    emit(PuzzleInitial());
+  void startGame() async {
+    _createEmptyPlayBox();
+    await Future.delayed(Duration(milliseconds: 500));
+    final currentState = (state as PuzzleImagesSet);
+    emit(currentState.copyWith(playStarted: true));
+    shuffle();
+  }
+
+  void _createEmptyPlayBox() {
+    // remove the last box to create play space
+    wildCard = _puzzleImages[8];
+    _emptyPosition = 8;
+    _puzzleImages = _puzzleImages.take(8).toList();
+    emit(PuzzleImagesSet(_puzzleImages, _puzzleBoxSize));
   }
 
   void shuffle() {
+    final currentState = (state as PuzzleImagesSet);
+    for (int i = 0; i < 8; i++) {
+      // shuffle images, generate random number and swap
+      var random = Random().nextInt(9);
+      while (random == i) {
+        random = Random().nextInt(9);
+      }
+      print('$i $random');
+      print(_puzzlePositions[random]);
+
+      var image1 = _getImageOfIndex(i);
+      if (image1 != null) {
+        image1 = image1.copyWith(
+            offset: _puzzlePositions[random], currentPosition: random);
+      }
+
+      var image2 = _getImageOfIndex(random);
+      if (image2 != null) {
+        image2 =
+            image2.copyWith(offset: _puzzlePositions[i], currentPosition: i);
+      }
+
+      if (image1 != null) _updatePuzzleImageInList(image1);
+      if (image2 != null) _updatePuzzleImageInList(image2);
+
+      emit(currentState.copyWith(
+        puzzleImages: _puzzleImages,
+        boxSize: _puzzleBoxSize,
+      ));
+    }
+    _setEmptyPosition();
+    print(_emptyPosition);
+  }
+
+  IndexedImage? _getImageOfIndex(int index) {
+    if (_puzzleImages.map((e) => e.currentPosition).toList().contains(index)) {
+      return _puzzleImages
+          .firstWhere((element) => element.currentPosition == index);
+    }
+    return null;
+  }
+
+  void _updatePuzzleImageInList(IndexedImage? newImage) {
     _puzzleImages = [
       for (final item in _puzzleImages)
-        if (item.realIndex == 4)
-          item.copyWith(offset: _puzzlePositions[5])
-        else
-          item
+        if (item.realIndex == newImage!.realIndex) newImage else item
     ];
-    emit(PuzzleImagesSet(_puzzleImages, (state as PuzzleImagesSet).boxSize));
+  }
+
+  void moveImage(IndexedImage image) {
+    final diff = (image.currentPosition - _emptyPosition).abs();
+    if (diff == 1 || diff == 3) {
+      _updatePuzzleImageInList(image.copyWith(
+          offset: _puzzlePositions[_emptyPosition],
+          currentPosition: _emptyPosition));
+      final currentState = (state as PuzzleImagesSet);
+      emit(currentState.copyWith(puzzleImages: _puzzleImages));
+      _setEmptyPosition();
+    }
+  }
+
+  void _setEmptyPosition() {
+    for (int i = 0; i < 9; i++) {
+      bool found = false;
+      for (final image in _puzzleImages) {
+        if (image.offset == _puzzlePositions[i]) found = true;
+      }
+      if (!found) {
+        _emptyPosition = i;
+        break;
+      }
+    }
   }
 
   void setPuzzlePositions(
       {required double puzzleFrameSize, required double boxInnerPadding}) {
     emit(PuzzleCreatingPositions());
-
-    double boxSize = (puzzleFrameSize - (2 * boxInnerPadding)) / 3;
+    _puzzlePositions.clear();
+    _puzzleBoxSize = (puzzleFrameSize - (2 * boxInnerPadding)) / 3;
     for (int i = 0; i < 9; i++) {
       late Offset offset;
       int realIndex = i + 1;
@@ -56,17 +135,18 @@ class PuzzleCubit extends Cubit<PuzzleState> {
         row = 2;
       }
 
-      double top = row * boxInnerPadding + row * boxSize;
+      double top = row * boxInnerPadding + row * _puzzleBoxSize;
       double positionInRow = realIndex - (row * 3) - 1;
-      double left = positionInRow * boxInnerPadding + positionInRow * boxSize;
+      double left =
+          positionInRow * boxInnerPadding + positionInRow * _puzzleBoxSize;
       offset = Offset(left, top);
       _puzzlePositions.add(offset);
     }
 
-    emit(PuzzlePositionsSet(boxSize));
+    emit(PuzzlePositionsSet());
   }
 
-  void setPuzzleImages(dynamic assetOrFile, double imageSize) async {
+  void setPuzzleImages(dynamic assetOrFile) async {
     emit(PuzzleCreatingImages(message: 'Framing Image'));
     _puzzleImages.clear();
     late List<int> initialImage;
@@ -92,7 +172,7 @@ class PuzzleCubit extends Cubit<PuzzleState> {
             image: processedImage,
             offset: _puzzlePositions[newIndex])
       ];
-      emit(PuzzleImagesSet(_puzzleImages, imageSize));
+      emit(PuzzleImagesSet(_puzzleImages, _puzzleBoxSize));
     });
 
     // check when splitting is done and dispose isolate
