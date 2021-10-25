@@ -32,17 +32,17 @@ class PuzzleImagesSet extends PuzzleState {
   final List<IndexedImage> puzzleImages;
   final double boxSize;
   final bool playStarted;
-  final bool hasWon;
+  final bool puzzleSolved;
   final int moves;
 
   PuzzleImagesSet(this.puzzleImages, this.boxSize,
-      {this.playStarted = false, this.hasWon = false, this.moves = 0});
+      {this.playStarted = false, this.puzzleSolved = false, this.moves = 0});
 
   PuzzleImagesSet copyWith({List<IndexedImage>? puzzleImages,
     double? boxSize, bool? playStarted, bool? hasWon, int? moves}) =>
       PuzzleImagesSet(puzzleImages ?? this.puzzleImages, boxSize??this.boxSize,
-     playStarted: playStarted ??this.playStarted,hasWon: hasWon??this.hasWon ,moves: moves??this.moves);
+     playStarted: playStarted ??this.playStarted,puzzleSolved: hasWon??this.puzzleSolved ,moves: moves??this.moves);
 
   @override
-  List<Object> get props => [puzzleImages, boxSize, playStarted, hasWon];
+  List<Object> get props => [puzzleImages, boxSize, playStarted, puzzleSolved];
 }

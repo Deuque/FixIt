@@ -9,5 +9,3 @@ const c.String downArrowIcon = '$imgAssetPath/arrow.png';
 const c.String newImageIcon = '$imgAssetPath/new_image.png';
 const c.String dottedLineIcon = '$imgAssetPath/dotted_line.png';
 const c.String tempPuzzleImage = '$imgAssetPath/temp_image.jpeg';
-const c.String closeIcon = '$imgAssetPath/close.png';
-const c.String checkIcon = '$imgAssetPath/check.png';

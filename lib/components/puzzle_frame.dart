@@ -82,7 +82,7 @@ class _PuzzleFrameState extends State<PuzzleFrame> {
           puzzleFrameSize: constraint.maxWidth, boxInnerPadding: 1.5);
     } else if (state is PuzzlePositionsSet) {
       _puzzleCubit.setPuzzleImages(widget.assetOrFile);
-    } else if (state is PuzzleImagesSet && state.hasWon) {
+    } else if (state is PuzzleImagesSet && state.puzzleSolved) {
       Future.delayed(Duration(milliseconds: 600),
           () => showPuzzleSolvedDialog(state.moves));
     }
@@ -100,7 +100,7 @@ class _PuzzleFrameState extends State<PuzzleFrame> {
                     curve: Curves.decelerate,
                     child: GestureDetector(
                       onTap: () {
-                        if (state.playStarted && !state.hasWon) {
+                        if (state.playStarted && !state.puzzleSolved) {
                           locator<PuzzleCubit>().moveImage(e);
                         }
                       },
