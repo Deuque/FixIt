@@ -1,8 +1,15 @@
 import 'package:fix_it/util/styles.dart';
-import 'package:fix_it/util/screen_size_util.dart';
 import 'package:flutter/material.dart';
 
 class PuzzleButton extends StatelessWidget {
+  const PuzzleButton(
+      {Key? key,
+      required this.title,
+      required this.enabled,
+      this.onPressed,
+      required this.borderRadius})
+      : super(key: key);
+
   const PuzzleButton.left(
       {Key? key, required this.title, required this.enabled, this.onPressed})
       : this.borderRadius = const BorderRadius.only(
@@ -25,7 +32,7 @@ class PuzzleButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: ()=>onPressed?.call(),
+      onTap: () => onPressed?.call(),
       child: Container(
         height: 40,
         alignment: Alignment.center,

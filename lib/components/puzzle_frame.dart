@@ -1,5 +1,6 @@
 import 'package:fix_it/components/loader.dart';
 import 'package:fix_it/components/puzzle_button.dart';
+import 'package:fix_it/components/puzzle_solved_dialog.dart';
 import 'package:fix_it/controllers/puzzle_controller/puzzle_cubit.dart';
 import 'package:fix_it/locator.dart';
 import 'package:fix_it/util/styles.dart';
@@ -81,12 +82,16 @@ class _PuzzleFrameState extends State<PuzzleFrame> {
           puzzleFrameSize: constraint.maxWidth, boxInnerPadding: 1.5);
     } else if (state is PuzzlePositionsSet) {
       _puzzleCubit.setPuzzleImages(widget.assetOrFile);
+    } else if (state is PuzzleImagesSet && state.hasWon) {
+      Future.delayed(Duration(milliseconds: 600),
+          () => showPuzzleSolvedDialog(state.moves));
     }
   }
 
   Widget _setImagesInPosition(PuzzleImagesSet state) => ClipRRect(
-    borderRadius: BorderRadius.vertical(top: Radius.circular(defPuzzleRadius)),
-    child: Stack(
+        borderRadius:
+            BorderRadius.vertical(top: Radius.circular(defPuzzleRadius)),
+        child: Stack(
           children: state.puzzleImages
               .map((e) => AnimatedPositioned(
                     top: e.offset.dy,
@@ -94,8 +99,8 @@ class _PuzzleFrameState extends State<PuzzleFrame> {
                     duration: Duration(milliseconds: 400),
                     curve: Curves.decelerate,
                     child: GestureDetector(
-                      onTap: (){
-                        if(state.playStarted){
+                      onTap: () {
+                        if (state.playStarted && !state.hasWon) {
                           locator<PuzzleCubit>().moveImage(e);
                         }
                       },
@@ -111,7 +116,7 @@ class _PuzzleFrameState extends State<PuzzleFrame> {
                   ))
               .toList(),
         ),
-  );
+      );
 
   Widget _backgroundPuzzleHint() => Container(
         decoration: BoxDecoration(
@@ -150,6 +155,25 @@ class _PuzzleFrameState extends State<PuzzleFrame> {
           ],
         ),
       );
+
+  void showPuzzleSolvedDialog(int moves) {
+    showDialog(
+        context: context,
+        builder: (context) => Dialog(
+              backgroundColor: Colors.transparent,
+              child: PuzzleSolvedDialog(
+                onCloseDialog: () {
+                  Navigator.pop(context);
+                  _puzzleCubit.stopPlay();
+                },
+                onPlayAgain: () {
+                  Navigator.pop(context);
+                  _puzzleCubit.startGame();
+                },
+                moves: moves,
+              ),
+            ));
+  }
 }
 
 class PuzzleControls extends StatelessWidget {
@@ -164,7 +188,7 @@ class PuzzleControls extends StatelessWidget {
             Expanded(
                 child: PuzzleButton.left(
               title: (state is PuzzleImagesSet && state.playStarted)
-                  ? '0'
+                  ? '${state.moves}'
                   : 'START',
               enabled: state is PuzzleImagesSet && !(state.playStarted),
               onPressed: () {

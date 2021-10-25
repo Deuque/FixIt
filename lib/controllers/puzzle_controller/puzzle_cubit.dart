@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'dart:math';
 
 import 'package:bloc/bloc.dart';
@@ -94,10 +93,22 @@ class PuzzleCubit extends Cubit<PuzzleState> {
       _updatePuzzleImageInList(image.copyWith(
           offset: _puzzlePositions[_emptyPosition],
           currentPosition: _emptyPosition));
+
+      bool hasWon = checkIfWon();
+      if (hasWon) _puzzleImages = [..._puzzleImages, wildCard];
       final currentState = (state as PuzzleImagesSet);
-      emit(currentState.copyWith(puzzleImages: _puzzleImages));
+      emit(currentState.copyWith(
+          puzzleImages: _puzzleImages,
+          moves: currentState.moves + 1,
+          hasWon: hasWon));
       _setEmptyPosition();
     }
+  }
+
+  void stopPlay(){
+    final currentState = (state as PuzzleImagesSet);
+    emit(currentState.copyWith(
+        playStarted: false,hasWon: false));
   }
 
   void _setEmptyPosition() {
@@ -111,6 +122,14 @@ class PuzzleCubit extends Cubit<PuzzleState> {
         break;
       }
     }
+  }
+
+  bool checkIfWon() {
+    bool hasWon = true;
+    for (final item in _puzzleImages) {
+      hasWon = hasWon && (item.currentPosition == item.realIndex);
+    }
+    return hasWon;
   }
 
   void setPuzzlePositions(

@@ -3,6 +3,7 @@ import 'package:fix_it/components/gallery.dart';
 import 'package:fix_it/components/icon_button.dart';
 import 'package:fix_it/components/puzzle_frame.dart';
 import 'package:fix_it/util/asset_util.dart';
+import 'package:fix_it/util/screen_size_util.dart';
 import 'package:fix_it/util/styles.dart';
 import 'package:flutter/material.dart';
 
@@ -11,6 +12,7 @@ class PlayArea extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    SizeUtil.init(context);
     return Scaffold(
       body: SafeArea(
         child: Column(
