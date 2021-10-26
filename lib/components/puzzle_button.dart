@@ -32,7 +32,7 @@ class PuzzleButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () => onPressed?.call(),
+      onTap: enabled ? () => onPressed?.call() : null,
       child: Container(
         height: 40,
         alignment: Alignment.center,

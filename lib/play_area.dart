@@ -22,7 +22,7 @@ class PlayArea extends StatelessWidget {
             TopBar(),
             Expanded(
                 child: PuzzleFrame(
-              assetOrFile: tempPuzzleImage,
+
             )),
             Gallery()
           ],

@@ -4,6 +4,7 @@ import 'package:fix_it/components/puzzle_solved_dialog.dart';
 import 'package:fix_it/controllers/puzzle_controller/puzzle_cubit.dart';
 import 'package:fix_it/controllers/score_controller.dart';
 import 'package:fix_it/locator.dart';
+import 'package:fix_it/util/asset_util.dart';
 import 'package:fix_it/util/styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -48,7 +49,7 @@ class _PuzzleFrameState extends State<PuzzleFrame> {
                     height: constraint.maxWidth,
                     width: constraint.maxWidth,
                     child: widget.assetOrFile == null
-                        ? SizedBox.shrink()
+                        ? _emptyPuzzler(constraint)
                         : Stack(
                             children: [
                               _backgroundPuzzleHint(),
@@ -154,6 +155,29 @@ class _PuzzleFrameState extends State<PuzzleFrame> {
                 style: TextStyle(color: white),
               )
             ]
+          ],
+        ),
+      );
+
+  Widget _emptyPuzzler(BoxConstraints constraint) =>
+      Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Image.asset(
+              emptyPuzzleIcon,
+              height: constraint.maxWidth * .14,
+              color: primary,
+            ),
+
+              SizedBox(
+                height: 5,
+              ),
+              Text(
+                'Select an Image',
+                style: TextStyle(color: white.withOpacity(.7)),
+              )
+
           ],
         ),
       );
