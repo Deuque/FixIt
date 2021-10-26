@@ -21,14 +21,14 @@ class PuzzleCubit extends Cubit<PuzzleState> {
     _createEmptyPlayBox();
     await Future.delayed(Duration(milliseconds: 500));
     final currentState = (state as PuzzleImagesSet);
-    emit(currentState.copyWith(playStarted: true));
+    emit(currentState.copyWith(playStarted: true,moves: 0));
     shuffle();
   }
 
   void stopGame(){
     final currentState = (state as PuzzleImagesSet);
     emit(currentState.copyWith(
-        playStarted: false,puzzleSolved: false));
+        playStarted: false,puzzleSolved: false,moves: 0));
   }
 
   void _createEmptyPlayBox() {
@@ -36,10 +36,12 @@ class PuzzleCubit extends Cubit<PuzzleState> {
     wildCard = _puzzleImages[8];
     _emptyPosition = 8;
     _puzzleImages = _puzzleImages.take(8).toList();
-    emit(PuzzleImagesSet(_puzzleImages, _puzzleBoxSize));
+    final currentState = (state as PuzzleImagesSet);
+    emit(currentState.copyWith(puzzleImages: _puzzleImages,));
   }
 
   void shuffle() {
+    return;
     final currentState = (state as PuzzleImagesSet);
     for (int i = 0; i < 8; i++) {
       // shuffle images, generate random number and swap
@@ -187,7 +189,7 @@ class PuzzleCubit extends Cubit<PuzzleState> {
             image: processedImage,
             offset: _puzzlePositions[newIndex])
       ];
-      emit(PuzzleImagesSet(_puzzleImages, _puzzleBoxSize));
+      emit(PuzzleImagesSet(_puzzleImages, _puzzleBoxSize,doneSettingUp: newIndex == 8));
     });
 
     // check when splitting is done and dispose isolate

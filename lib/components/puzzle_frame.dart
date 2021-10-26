@@ -1,6 +1,7 @@
+import 'package:fix_it/components/dialogs/confirm_image_selection.dart';
 import 'package:fix_it/components/loader.dart';
 import 'package:fix_it/components/puzzle_button.dart';
-import 'package:fix_it/components/puzzle_solved_dialog.dart';
+import 'package:fix_it/components/dialogs/puzzle_solved.dart';
 import 'package:fix_it/controllers/puzzle_controller/puzzle_cubit.dart';
 import 'package:fix_it/controllers/score_controller.dart';
 import 'package:fix_it/locator.dart';
@@ -187,13 +188,16 @@ class _PuzzleFrameState extends State<PuzzleFrame> {
         context: context,
         builder: (context) => Dialog(
               backgroundColor: Colors.transparent,
-              child: PuzzleSolvedDialog(
-                onCloseDialog: () {
+              child:
+
+              PuzzleSolvedDialog(
+                onCancel: () {
                   Navigator.pop(context);
                   _puzzleCubit.stopGame();
                 },
                 onPlayAgain: () {
                   Navigator.pop(context);
+                  _puzzleCubit.stopGame();
                   _puzzleCubit.startGame();
                 },
                 moves: moves,
@@ -216,7 +220,7 @@ class PuzzleControls extends StatelessWidget {
               title: (state is PuzzleImagesSet && state.playStarted)
                   ? '${state.moves}'
                   : 'START',
-              enabled: state is PuzzleImagesSet && !(state.playStarted),
+              enabled: state is PuzzleImagesSet && state.doneSettingUp && !(state.playStarted),
               onPressed: () {
                 locator<PuzzleCubit>().startGame();
               },

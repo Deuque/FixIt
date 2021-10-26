@@ -1,4 +1,4 @@
-import 'package:fix_it/components/animated_dialog.dart';
+import 'package:fix_it/components/dialogs/animated_dialog.dart';
 import 'package:fix_it/components/puzzle_button.dart';
 import 'package:fix_it/util/screen_size_util.dart';
 import 'package:fix_it/util/styles.dart';
@@ -6,13 +6,13 @@ import 'package:flutter/material.dart';
 
 class PuzzleSolvedDialog extends StatelessWidget {
   final int moves;
-  final VoidCallback onCloseDialog;
+  final VoidCallback onCancel;
   final VoidCallback onPlayAgain;
 
   const PuzzleSolvedDialog(
       {Key? key,
       required this.moves,
-      required this.onCloseDialog,
+      required this.onCancel,
       required this.onPlayAgain})
       : super(key: key);
 
@@ -55,7 +55,7 @@ class PuzzleSolvedDialog extends StatelessWidget {
                   onPressed: () {
                     controller
                         .reverse()
-                        .whenComplete(() => onCloseDialog.call());
+                        .whenComplete(() => onCancel.call());
                   },
                 )),
                 SizedBox(
