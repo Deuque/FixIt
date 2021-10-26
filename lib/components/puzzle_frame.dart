@@ -2,6 +2,7 @@ import 'package:fix_it/components/loader.dart';
 import 'package:fix_it/components/puzzle_button.dart';
 import 'package:fix_it/components/puzzle_solved_dialog.dart';
 import 'package:fix_it/controllers/puzzle_controller/puzzle_cubit.dart';
+import 'package:fix_it/controllers/score_controller.dart';
 import 'package:fix_it/locator.dart';
 import 'package:fix_it/util/styles.dart';
 import 'package:flutter/material.dart';
@@ -85,6 +86,7 @@ class _PuzzleFrameState extends State<PuzzleFrame> {
     } else if (state is PuzzleImagesSet && state.puzzleSolved) {
       Future.delayed(Duration(milliseconds: 600),
           () => showPuzzleSolvedDialog(state.moves));
+      locator<ScoreController>().checkAndUpdateScore(state.moves);
     }
   }
 
@@ -164,7 +166,7 @@ class _PuzzleFrameState extends State<PuzzleFrame> {
               child: PuzzleSolvedDialog(
                 onCloseDialog: () {
                   Navigator.pop(context);
-                  _puzzleCubit.stopPlay();
+                  _puzzleCubit.stopGame();
                 },
                 onPlayAgain: () {
                   Navigator.pop(context);

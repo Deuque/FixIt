@@ -17,16 +17,18 @@ class PuzzleCubit extends Cubit<PuzzleState> {
   late IndexedImage wildCard;
   late int _emptyPosition;
 
-  void tet() {
-    emit(PuzzleInitial());
-  }
-
   void startGame() async {
     _createEmptyPlayBox();
     await Future.delayed(Duration(milliseconds: 500));
     final currentState = (state as PuzzleImagesSet);
     emit(currentState.copyWith(playStarted: true));
     shuffle();
+  }
+
+  void stopGame(){
+    final currentState = (state as PuzzleImagesSet);
+    emit(currentState.copyWith(
+        playStarted: false,puzzleSolved: false));
   }
 
   void _createEmptyPlayBox() {
@@ -94,21 +96,15 @@ class PuzzleCubit extends Cubit<PuzzleState> {
           offset: _puzzlePositions[_emptyPosition],
           currentPosition: _emptyPosition));
 
-      bool hasWon = checkIfWon();
-      if (hasWon) _puzzleImages = [..._puzzleImages, wildCard];
+      bool isSolved = checkIfSolved();
+      if (isSolved) _puzzleImages = [..._puzzleImages, wildCard];
       final currentState = (state as PuzzleImagesSet);
       emit(currentState.copyWith(
           puzzleImages: _puzzleImages,
           moves: currentState.moves + 1,
-          hasWon: hasWon));
+          puzzleSolved: isSolved));
       _setEmptyPosition();
     }
-  }
-
-  void stopPlay(){
-    final currentState = (state as PuzzleImagesSet);
-    emit(currentState.copyWith(
-        playStarted: false,hasWon: false));
   }
 
   void _setEmptyPosition() {
@@ -124,7 +120,7 @@ class PuzzleCubit extends Cubit<PuzzleState> {
     }
   }
 
-  bool checkIfWon() {
+  bool checkIfSolved() {
     bool hasWon = true;
     for (final item in _puzzleImages) {
       hasWon = hasWon && (item.currentPosition == item.realIndex);

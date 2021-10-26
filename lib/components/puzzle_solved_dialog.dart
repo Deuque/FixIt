@@ -1,9 +1,10 @@
+import 'package:fix_it/components/animated_dialog.dart';
 import 'package:fix_it/components/puzzle_button.dart';
 import 'package:fix_it/util/screen_size_util.dart';
 import 'package:fix_it/util/styles.dart';
 import 'package:flutter/material.dart';
 
-class PuzzleSolvedDialog extends StatefulWidget {
+class PuzzleSolvedDialog extends StatelessWidget {
   final int moves;
   final VoidCallback onCloseDialog;
   final VoidCallback onPlayAgain;
@@ -16,30 +17,9 @@ class PuzzleSolvedDialog extends StatefulWidget {
       : super(key: key);
 
   @override
-  _PuzzleSolvedDialogState createState() => _PuzzleSolvedDialogState();
-}
-
-class _PuzzleSolvedDialogState extends State<PuzzleSolvedDialog>
-    with SingleTickerProviderStateMixin {
-  late final _animationController =
-      AnimationController(vsync: this, duration: Duration(milliseconds: 1500));
-  late final Animation<double> _scaleAnimation = CurvedAnimation(
-    parent: _animationController,
-    curve: Curves.elasticInOut,
-  );
-
-  @override
-  void dispose() {
-    _animationController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    _animationController.forward();
-    return ScaleTransition(
-      scale: _scaleAnimation,
-      child: Container(
+    return AnimatedDialog(builder: (controller) {
+      return Container(
         margin: EdgeInsets.all(SizeUtil.sWidth * .09),
         decoration: BoxDecoration(
             color: background,
@@ -59,7 +39,7 @@ class _PuzzleSolvedDialogState extends State<PuzzleSolvedDialog>
             ),
             SizedBox(height: 8),
             Text(
-              '${widget.moves}',
+              '$moves',
               style: TextStyle(
                   color: primary, fontSize: 40, fontWeight: FontWeight.bold),
             ),
@@ -73,9 +53,9 @@ class _PuzzleSolvedDialogState extends State<PuzzleSolvedDialog>
                   title: 'CANCEL',
                   enabled: true,
                   onPressed: () {
-                    _animationController
+                    controller
                         .reverse()
-                        .whenComplete(() => widget.onCloseDialog.call());
+                        .whenComplete(() => onCloseDialog.call());
                   },
                 )),
                 SizedBox(
@@ -86,16 +66,14 @@ class _PuzzleSolvedDialogState extends State<PuzzleSolvedDialog>
                   title: 'PLAY AGAIN',
                   enabled: true,
                   onPressed: () {
-                    _animationController
-                        .reverse()
-                        .whenComplete(() => widget.onPlayAgain.call());
+                    controller.reverse().whenComplete(() => onPlayAgain.call());
                   },
                 )),
               ],
             )
           ],
         ),
-      ),
-    );
+      );
+    });
   }
 }
