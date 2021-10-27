@@ -5,16 +5,16 @@ import 'package:fix_it/util/screen_size_util.dart';
 import 'package:fix_it/util/styles.dart';
 import 'package:flutter/material.dart';
 
-class ConfirmImageSelection extends StatelessWidget {
+class ConfirmImageDelete extends StatelessWidget {
   final dynamic assetOrFile;
   final VoidCallback onCancel;
-  final VoidCallback onPlay;
+  final VoidCallback onDelete;
 
-  const ConfirmImageSelection(
+  const ConfirmImageDelete(
       {Key? key,
       required this.assetOrFile,
       required this.onCancel,
-      required this.onPlay})
+      required this.onDelete})
       : super(key: key);
 
   @override
@@ -36,7 +36,7 @@ class ConfirmImageSelection extends StatelessWidget {
                   height: (topImageSize / 2) + 30,
                 ),
                 Text(
-                  'Do you want to play \nwith this Image?',
+                  'Do you want to delete \nthis Image?',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                       color: white, fontSize: 15, fontWeight: FontWeight.w500),
@@ -61,12 +61,12 @@ class ConfirmImageSelection extends StatelessWidget {
                     ),
                     Expanded(
                         child: PuzzleButton.right(
-                      title: 'PLAY',
+                      title: 'DELETE',
                       enabled: true,
                       onPressed: () {
                         controller
                             .reverse()
-                            .whenComplete(() => onPlay.call());
+                            .whenComplete(() => onDelete.call());
                       },
                     )),
                   ],

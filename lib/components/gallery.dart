@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:fix_it/components/dialogs/confirm_image_delete.dart';
 import 'package:fix_it/components/dialogs/confirm_image_selection.dart';
 import 'package:fix_it/components/gallery_image.dart';
 import 'package:fix_it/components/icon_button.dart';
@@ -81,30 +82,46 @@ class _GalleryState extends State<Gallery> with SingleTickerProviderStateMixin {
         });
   }
 
-  void _showConfirmImageDialog(dynamic image) {
+  void _showConfirmImageSelection(dynamic image) {
     showDialog(
         context: context,
         builder: (context) => Dialog(
-          backgroundColor: Colors.transparent,
-          child:
+              backgroundColor: Colors.transparent,
+              child: ConfirmImageSelection(
+                onCancel: () {
+                  Navigator.pop(context);
+                },
+                onPlay: () {
+                  Navigator.pop(context);
+                  _galleryController.setImageInPlay(image);
+                },
+                assetOrFile: image,
+              ),
+            ));
+  }
 
-          ConfirmImageDialog(
-            onCancel: () {
-              Navigator.pop(context);
-            },
-            onPlay: () {
-              Navigator.pop(context);
-              _galleryController.setImageInPlay(image);
-            },
-            assetOrFile: image,
-          ),
-        ));
+  void _showConfirmImageDelete(dynamic image) {
+    showDialog(
+        context: context,
+        builder: (context) => Dialog(
+              backgroundColor: Colors.transparent,
+              child: ConfirmImageDelete(
+                onCancel: () {
+                  Navigator.pop(context);
+                },
+                onDelete: () {
+                  Navigator.pop(context);
+                  _galleryController.deleteGalleryImage(image);
+                },
+                assetOrFile: image,
+              ),
+            ));
   }
 
   Widget _galleryRow() => Row(
         children: [
           SelectImage(
-              size: 80,
+              size: _galleryController.imageSize-5,
               onImageGotten: (image) {
                 _galleryController.saveGalleryImage(image);
               }),
@@ -116,7 +133,7 @@ class _GalleryState extends State<Gallery> with SingleTickerProviderStateMixin {
               builder: (context, images, child) {
                 return Expanded(
                     child: SizedBox(
-                  height: 80,
+                  height: _galleryController.imageSize,
                   child: ListView.separated(
                       shrinkWrap: true,
                       scrollDirection: Axis.horizontal,
@@ -135,9 +152,13 @@ class _GalleryState extends State<Gallery> with SingleTickerProviderStateMixin {
                                       : (value as File).path;
                               return GalleryImage(
                                   image: image,
-                                  size: 80,
+                                  size: _galleryController.imageSize,
                                   onClick: (image) {
-                                    _showConfirmImageDialog(image);
+                                    _showConfirmImageSelection(image);
+                                  },
+                                  onLongPress: (image) {
+                                    if (image is String) return;
+                                    _showConfirmImageDelete(image);
                                   },
                                   inPlay: identifier == inPlayIdentifier);
                             });

@@ -26,4 +26,11 @@ class GalleryRepository {
     if (!galleryPaths.contains(file.path)) galleryPaths.insert(0, file.path);
     pref.setStringList(_galleryKey, galleryPaths);
   }
+
+  Future<void> deleteGalleryImage(File file) async {
+    final pref = await _prefs;
+    final galleryPaths = pref.getStringList(_galleryKey) ?? <String>[];
+    if (!galleryPaths.contains(file.path)) galleryPaths.remove(file.path);
+    pref.setStringList(_galleryKey, galleryPaths);
+  }
 }

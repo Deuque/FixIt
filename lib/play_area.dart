@@ -9,6 +9,7 @@ import 'package:fix_it/util/asset_util.dart';
 import 'package:fix_it/util/screen_size_util.dart';
 import 'package:fix_it/util/styles.dart';
 import 'package:flutter/material.dart';
+import 'package:share_plus/share_plus.dart';
 
 class PlayArea extends StatelessWidget {
   const PlayArea({Key? key}) : super(key: key);
@@ -23,13 +24,12 @@ class PlayArea extends StatelessWidget {
             TopBar(),
             Expanded(
                 child: ValueListenableBuilder(
-                  valueListenable: locator<GalleryController>().imageInPlay,
-                  builder: (context, image,child) {
-                    return PuzzleFrame(
-              assetOrFile: image,
-            );
-                  }
-                )),
+                    valueListenable: locator<GalleryController>().imageInPlay,
+                    builder: (context, image, child) {
+                      return PuzzleFrame(
+                        assetOrFile: image,
+                      );
+                    })),
             Gallery()
           ],
         ),
@@ -50,7 +50,9 @@ class TopBar extends StatelessWidget {
         children: [
           MIcon(
             imgName: shareIcon,
-            onTap: () {},
+            onTap: () => Share.share(
+                'Check out https://play.google.com/store/apps/details?id=com.dcdevs.fix_it',
+                subject: 'How fast can you solve a puzzle?'),
             size: 18,
           ),
           ValueListenableBuilder<int>(
