@@ -9,6 +9,14 @@ class PuzzleInitial extends PuzzleState {
   List<Object> get props => [];
 }
 
+class PuzzleStart extends PuzzleState {
+  final dynamic image;
+
+  PuzzleStart(this.image);
+  @override
+  List<Object> get props => [image];
+}
+
 class PuzzleCreatingPositions extends PuzzleState {
   @override
   List<Object> get props => [];
@@ -19,10 +27,10 @@ class PuzzlePositionsSet extends PuzzleState {
   List<Object> get props => [];
 }
 
-class PuzzleCreatingImages extends PuzzleState {
+class PuzzleFramingImages extends PuzzleState {
   final String? message;
 
-  PuzzleCreatingImages({this.message});
+  PuzzleFramingImages({this.message});
 
   @override
   List<Object> get props => [(message ?? '')];

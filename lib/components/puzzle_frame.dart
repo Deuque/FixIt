@@ -1,7 +1,6 @@
-import 'package:fix_it/components/dialogs/confirm_image_selection.dart';
+import 'package:fix_it/components/dialogs/puzzle_solved.dart';
 import 'package:fix_it/components/loader.dart';
 import 'package:fix_it/components/puzzle_button.dart';
-import 'package:fix_it/components/dialogs/puzzle_solved.dart';
 import 'package:fix_it/controllers/puzzle_controller/puzzle_cubit.dart';
 import 'package:fix_it/controllers/score_controller.dart';
 import 'package:fix_it/locator.dart';
@@ -22,12 +21,14 @@ class PuzzleFrame extends StatefulWidget {
 class _PuzzleFrameState extends State<PuzzleFrame> {
   final _puzzleCubit = locator<PuzzleCubit>();
 
-  @override
-  void initState() {
-    WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
-      _puzzleCubit.emit(PuzzleInitial());
-    });
-    super.initState();
+ @override
+  void didUpdateWidget(covariant PuzzleFrame oldWidget) {
+   if(oldWidget.assetOrFile!=widget.assetOrFile) {
+      WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
+        _puzzleCubit.emit(PuzzleStart(widget.assetOrFile));
+      });
+    }
+    super.didUpdateWidget(oldWidget);
   }
 
   @override
@@ -59,7 +60,7 @@ class _PuzzleFrameState extends State<PuzzleFrame> {
                                       _puzzleBlocListener(
                                           context, state, constraint),
                                   builder: (context, state) {
-                                    if (state is PuzzleCreatingImages)
+                                    if (state is PuzzleFramingImages)
                                       return _createPuzzleLoader(
                                           state, constraint);
                                     if (state is PuzzleImagesSet)
@@ -80,7 +81,7 @@ class _PuzzleFrameState extends State<PuzzleFrame> {
   }
 
   void _puzzleBlocListener(context, state, BoxConstraints constraint) {
-    if (state is PuzzleInitial) {
+    if (state is PuzzleStart) {
       _puzzleCubit.setPuzzlePositions(
           puzzleFrameSize: constraint.maxWidth, boxInnerPadding: 1.5);
     } else if (state is PuzzlePositionsSet) {
@@ -125,7 +126,7 @@ class _PuzzleFrameState extends State<PuzzleFrame> {
   Widget _backgroundPuzzleHint() => Container(
         decoration: BoxDecoration(
           image: DecorationImage(
-              image: AssetImage(widget.assetOrFile), fit: BoxFit.fill),
+              image: assetProvider(widget.assetOrFile), fit: BoxFit.fill),
           borderRadius:
               BorderRadius.vertical(top: Radius.circular(defPuzzleRadius)),
         ),
@@ -139,7 +140,7 @@ class _PuzzleFrameState extends State<PuzzleFrame> {
       );
 
   Widget _createPuzzleLoader(
-          PuzzleCreatingImages state, BoxConstraints constraint) =>
+          PuzzleFramingImages state, BoxConstraints constraint) =>
       Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,

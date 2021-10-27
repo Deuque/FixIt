@@ -6,13 +6,13 @@ import 'package:fix_it/util/styles.dart';
 import 'package:flutter/material.dart';
 
 class ConfirmImageDialog extends StatelessWidget {
-  final int moves;
+  final dynamic assetOrFile;
   final VoidCallback onCancel;
   final VoidCallback onPlay;
 
   const ConfirmImageDialog(
       {Key? key,
-      required this.moves,
+      required this.assetOrFile,
       required this.onCancel,
       required this.onPlay})
       : super(key: key);
@@ -87,7 +87,7 @@ class ConfirmImageDialog extends StatelessWidget {
                 margin: EdgeInsets.all(3),
                 decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    image: DecorationImage(image: AssetImage(tempPuzzleImage))),
+                    image: DecorationImage(image: assetProvider(assetOrFile))),
               ),
             ),
           )

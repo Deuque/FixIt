@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:math';
 
 import 'package:bloc/bloc.dart';
@@ -21,14 +22,14 @@ class PuzzleCubit extends Cubit<PuzzleState> {
     _createEmptyPlayBox();
     await Future.delayed(Duration(milliseconds: 500));
     final currentState = (state as PuzzleImagesSet);
-    emit(currentState.copyWith(playStarted: true,moves: 0));
+    emit(currentState.copyWith(playStarted: true, moves: 0));
     shuffle();
   }
 
-  void stopGame(){
+  void stopGame() {
     final currentState = (state as PuzzleImagesSet);
     emit(currentState.copyWith(
-        playStarted: false,puzzleSolved: false,moves: 0));
+        playStarted: false, puzzleSolved: false, moves: 0));
   }
 
   void _createEmptyPlayBox() {
@@ -37,7 +38,14 @@ class PuzzleCubit extends Cubit<PuzzleState> {
     _emptyPosition = 8;
     _puzzleImages = _puzzleImages.take(8).toList();
     final currentState = (state as PuzzleImagesSet);
-    emit(currentState.copyWith(puzzleImages: _puzzleImages,));
+    emit(currentState.copyWith(
+      puzzleImages: _puzzleImages,
+    ));
+  }
+
+  void clearLists() {
+    _puzzlePositions.clear();
+    _puzzleImages.clear();
   }
 
   void shuffle() {
@@ -49,8 +57,6 @@ class PuzzleCubit extends Cubit<PuzzleState> {
       while (random == i) {
         random = Random().nextInt(9);
       }
-      print('$i $random');
-      print(_puzzlePositions[random]);
 
       var image1 = _getImageOfIndex(i);
       if (image1 != null) {
@@ -73,7 +79,6 @@ class PuzzleCubit extends Cubit<PuzzleState> {
       ));
     }
     _setEmptyPosition();
-    print(_emptyPosition);
   }
 
   IndexedImage? _getImageOfIndex(int index) {
@@ -133,7 +138,7 @@ class PuzzleCubit extends Cubit<PuzzleState> {
   void setPuzzlePositions(
       {required double puzzleFrameSize, required double boxInnerPadding}) {
     emit(PuzzleCreatingPositions());
-    _puzzlePositions.clear();
+    clearLists();
     _puzzleBoxSize = (puzzleFrameSize - (2 * boxInnerPadding)) / 3;
     for (int i = 0; i < 9; i++) {
       late Offset offset;
@@ -164,12 +169,14 @@ class PuzzleCubit extends Cubit<PuzzleState> {
   }
 
   void setPuzzleImages(dynamic assetOrFile) async {
-    emit(PuzzleCreatingImages(message: 'Framing Image'));
+    emit(PuzzleFramingImages(message: 'Framing Image'));
     _puzzleImages.clear();
     late List<int> initialImage;
     if (assetOrFile is String) {
       var data = await rootBundle.load(assetOrFile);
       initialImage = data.buffer.asUint8List().toList();
+    } else if (assetOrFile is File) {
+      initialImage = await assetOrFile.readAsBytes();
     } else {
       throw UnimplementedError();
     }
@@ -189,7 +196,8 @@ class PuzzleCubit extends Cubit<PuzzleState> {
             image: processedImage,
             offset: _puzzlePositions[newIndex])
       ];
-      emit(PuzzleImagesSet(_puzzleImages, _puzzleBoxSize,doneSettingUp: newIndex == 8));
+      emit(PuzzleImagesSet(_puzzleImages, _puzzleBoxSize,
+          doneSettingUp: newIndex == 8));
     });
 
     // check when splitting is done and dispose isolate

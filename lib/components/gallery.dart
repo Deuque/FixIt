@@ -1,4 +1,7 @@
+import 'dart:io';
 
+import 'package:fix_it/components/dialogs/confirm_image_selection.dart';
+import 'package:fix_it/components/gallery_image.dart';
 import 'package:fix_it/components/icon_button.dart';
 import 'package:fix_it/components/select_image.dart';
 import 'package:fix_it/controllers/gallery_controller.dart';
@@ -69,8 +72,7 @@ class _GalleryState extends State<Gallery> with SingleTickerProviderStateMixin {
                   sizeFactor: _gallerySizeAnimation,
                   child: Padding(
                     padding: const EdgeInsets.only(top: 20),
-                    child: SelectImage(
-                        size: 80, onImageGotten: (image) {}),
+                    child: _galleryRow(),
                   ),
                 )
               ],
@@ -78,4 +80,74 @@ class _GalleryState extends State<Gallery> with SingleTickerProviderStateMixin {
           );
         });
   }
+
+  void _showConfirmImageDialog(dynamic image) {
+    showDialog(
+        context: context,
+        builder: (context) => Dialog(
+          backgroundColor: Colors.transparent,
+          child:
+
+          ConfirmImageDialog(
+            onCancel: () {
+              Navigator.pop(context);
+            },
+            onPlay: () {
+              Navigator.pop(context);
+              _galleryController.setImageInPlay(image);
+            },
+            assetOrFile: image,
+          ),
+        ));
+  }
+
+  Widget _galleryRow() => Row(
+        children: [
+          SelectImage(
+              size: 80,
+              onImageGotten: (image) {
+                _galleryController.saveGalleryImage(image);
+              }),
+          SizedBox(
+            width: 15,
+          ),
+          ValueListenableBuilder<List<dynamic>>(
+              valueListenable: _galleryController.galleryImages,
+              builder: (context, images, child) {
+                return Expanded(
+                    child: SizedBox(
+                  height: 80,
+                  child: ListView.separated(
+                      shrinkWrap: true,
+                      scrollDirection: Axis.horizontal,
+                      itemBuilder: (_, i) {
+                        final image = images[i];
+                        final identifier =
+                            image is String ? image : (image as File).path;
+
+                        return ValueListenableBuilder(
+                            valueListenable: _galleryController.imageInPlay,
+                            builder: (_, value, child) {
+                              final inPlayIdentifier = value == null
+                                  ? null
+                                  : value is String
+                                      ? value
+                                      : (value as File).path;
+                              return GalleryImage(
+                                  image: image,
+                                  size: 80,
+                                  onClick: (image) {
+                                    _showConfirmImageDialog(image);
+                                  },
+                                  inPlay: identifier == inPlayIdentifier);
+                            });
+                      },
+                      separatorBuilder: (_, i) => SizedBox(
+                            width: 15,
+                          ),
+                      itemCount: images.length),
+                ));
+              }),
+        ],
+      );
 }

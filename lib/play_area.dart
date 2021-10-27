@@ -2,6 +2,7 @@ import 'package:fix_it/components/best_score.dart';
 import 'package:fix_it/components/gallery.dart';
 import 'package:fix_it/components/icon_button.dart';
 import 'package:fix_it/components/puzzle_frame.dart';
+import 'package:fix_it/controllers/gallery_controller.dart';
 import 'package:fix_it/controllers/score_controller.dart';
 import 'package:fix_it/locator.dart';
 import 'package:fix_it/util/asset_util.dart';
@@ -21,9 +22,14 @@ class PlayArea extends StatelessWidget {
           children: [
             TopBar(),
             Expanded(
-                child: PuzzleFrame(
-              assetOrFile: tempPuzzleImage,
-            )),
+                child: ValueListenableBuilder(
+                  valueListenable: locator<GalleryController>().imageInPlay,
+                  builder: (context, image,child) {
+                    return PuzzleFrame(
+              assetOrFile: image,
+            );
+                  }
+                )),
             Gallery()
           ],
         ),
