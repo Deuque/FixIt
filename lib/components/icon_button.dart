@@ -24,7 +24,7 @@ class MIcon extends StatelessWidget {
             color: background,
             shape: BoxShape.circle, boxShadow: [
           BoxShadow(
-              color: black.withOpacity(.4), offset: Offset(0, 0), blurRadius: 8, spreadRadius: 2)
+              color: black.withOpacity(.2), offset: Offset(0, 0), blurRadius: 5, spreadRadius: 2)
         ]),
       ),
     );

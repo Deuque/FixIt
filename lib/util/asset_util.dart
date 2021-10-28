@@ -4,7 +4,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 
-const c.String imgAssetPath = 'assets/images/';
+const c.String imgAssetPath = 'assets/images';
 const c.String homeIcon= '$imgAssetPath/home.png';
 const c.String crownIcon = '$imgAssetPath/crown.png';
 const c.String shareIcon = '$imgAssetPath/share.png';

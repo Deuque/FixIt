@@ -49,7 +49,6 @@ class PuzzleCubit extends Cubit<PuzzleState> {
   }
 
   void shuffle() {
-    return;
     final currentState = (state as PuzzleImagesSet);
     for (int i = 0; i < 8; i++) {
       // shuffle images, generate random number and swap

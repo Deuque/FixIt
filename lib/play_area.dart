@@ -53,12 +53,12 @@ class TopBar extends StatelessWidget {
             onTap: () => Share.share(
                 'Check out https://play.google.com/store/apps/details?id=com.dcdevs.fix_it',
                 subject: 'How fast can you solve a puzzle?'),
-            size: 18,
+            size: 16,
           ),
           ValueListenableBuilder<int>(
               valueListenable: locator<ScoreController>().bestScoreNotifier,
               builder: (context, value, child) {
-                return BestScore(size: 20, score: value);
+                return BestScore(size: 18, score: value);
               })
         ],
       ),
